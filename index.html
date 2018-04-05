@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GraphQL Test</title>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <button type="button" id="btnUsersWithPosts">get users with posts</button>
+    <button type="button" id="btnUsers">get users</button>
+    <button type="button" id="btnPosts">get posts</button>
+
+    <div id="result"></div>
+
+    <script>
+
+        function sendToGraphQl(text){
+            $.ajax({
+                type: 'POST',
+                url: '/graphql',
+                data: JSON.stringify({ query: text }),
+                contentType: 'application/json',
+            }).done(function (response) {
+                console.log(response.data);
+                $('#result').text(JSON.stringify(response.data));
+            })
+        }
+
+        $('#btnPosts').click(function(){
+            var posts = `{
+                posts{
+                    id,
+                    text
+                }
+            }`
+
+            sendToGraphQl(posts);
+        })
+
+        $('#btnUsers').click(function(){
+            var users = `{
+                users{
+                    id,
+                    name
+                }
+            }`
+
+            sendToGraphQl(users);
+        });
+
+        $('#btnUsersWithPosts').click(function () {
+
+            var usersWithPosts = `{
+                users{
+                    id,
+                    name,
+                    posts{
+                        id,
+                        text
+                    }
+                }
+            }`;
+
+            sendToGraphQl(usersWithPosts);
+        });
+    </script>
+
+</body>
+
+</html>
