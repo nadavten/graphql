@@ -13,6 +13,24 @@
 
 <body>
 
+    <div>
+        <label>User name</label>
+        <input type="text" id="username">
+    </div>
+
+    <div>
+        <label>Post text</label>
+        <input type="text" id="post">
+
+        <label>User id</label>
+        <input type="text" id="postUserID">
+    </div>
+
+
+    <button type="button" id="btnAddUser">add user</button>
+    <button type="button" id="btnAddPost">add post</button>
+
+
     <button type="button" id="btnUsersWithPosts">get users with posts</button>
     <button type="button" id="btnUsers">get users</button>
     <button type="button" id="btnPosts">get posts</button>
@@ -21,11 +39,12 @@
 
     <script>
 
-        function sendToGraphQl(text){
+        function sendToGraphQl(text,vars) {
+
             $.ajax({
                 type: 'POST',
                 url: '/graphql',
-                data: JSON.stringify({ query: text }),
+                data: JSON.stringify({ query: text , variables:vars }),
                 contentType: 'application/json',
             }).done(function (response) {
                 console.log(response.data);
@@ -33,24 +52,61 @@
             })
         }
 
-        $('#btnPosts').click(function(){
+        $('#btnAddUser').click(function () {
+
+            var username = $('#username').val();
+
+            var query = `mutation CreateUser($name:String!){
+                createUser(name:$name){
+                    id
+                }
+            }`;
+
+            var vars = {
+                name : username
+            }
+
+            sendToGraphQl(query,vars);
+        });
+
+        $('#btnAddPost').click(function () {
+
+            var userID = $('#postUserID').val();
+            var postText = $('#post').val();
+
+            var post = `mutation CreatePost($userID:ID!,$text:String!){
+                createPost(userID:$userID,text:$text){
+                    id
+                }
+            }`;
+
+            var vars = {
+                userID:userID,
+                text:postText
+            }
+
+            sendToGraphQl(post,vars);
+        });
+
+        $('#btnPosts').click(function () {
             var posts = `{
                 posts{
                     id,
                     text
                 }
-            }`
+            }`;
+
 
             sendToGraphQl(posts);
         })
 
-        $('#btnUsers').click(function(){
+        $('#btnUsers').click(function () {
             var users = `{
-                users{
-                    id,
-                    name
-                }
-            }`
+                    users{
+                        id,
+                        name
+                    }
+                }`;
 
             sendToGraphQl(users);
         });
@@ -58,15 +114,16 @@
         $('#btnUsersWithPosts').click(function () {
 
             var usersWithPosts = `{
-                users{
-                    id,
-                    name,
-                    posts{
+                    users{
                         id,
-                        text
+                        name,
+                        posts{
+                            id,
+                            text
+                        }
                     }
-                }
-            }`;
+                }`;
+            
 
             sendToGraphQl(usersWithPosts);
         });
